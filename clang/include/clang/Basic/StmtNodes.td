@@ -7,7 +7,8 @@ class StmtNode<StmtNode base, bit abstract = 0> : ASTNode, AttrSubject {
 
 // Statements
 def Stmt : StmtNode<?, 1>;
-def NullStmt : StmtNode<Stmt>;
+def ExprStmt : StmtNode<Stmt, 1>;
+def NullStmt : StmtNode<ExprStmt>;
 def CompoundStmt : StmtNode<Stmt>;
 def IfStmt : StmtNode<Stmt>;
 def SwitchStmt : StmtNode<Stmt>;
@@ -18,7 +19,7 @@ def GotoStmt : StmtNode<Stmt>;
 def IndirectGotoStmt : StmtNode<Stmt>;
 def ContinueStmt : StmtNode<Stmt>;
 def BreakStmt : StmtNode<Stmt>;
-def ReturnStmt : StmtNode<Stmt>;
+def ReturnStmt : StmtNode<ExprStmt>;
 def DeclStmt  : StmtNode<Stmt>;
 def SwitchCase : StmtNode<Stmt, 1>;
 def CaseStmt : StmtNode<SwitchCase>;

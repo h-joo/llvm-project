@@ -3265,8 +3265,9 @@ static bool hasDeducedReturnType(FunctionDecl *FD) {
 /// ActOnCapScopeReturnStmt - Utility routine to type-check return statements
 /// for capturing scopes.
 ///
-StmtResult
-Sema::ActOnCapScopeReturnStmt(SourceLocation ReturnLoc, Expr *RetValExp) {
+StmtResult Sema::ActOnCapScopeReturnStmt(SourceLocation ReturnLoc,
+                                         SourceLocation SemiLoc,
+                                         Expr *RetValExp) {
   // If this is the first return we've seen, infer the return type.
   // [expr.prim.lambda]p4 in C++11; block literals follow the same rules.
   CapturingScopeInfo *CurCap = cast<CapturingScopeInfo>(getCurFunction());
@@ -3285,7 +3286,7 @@ Sema::ActOnCapScopeReturnStmt(SourceLocation ReturnLoc, Expr *RetValExp) {
         return StmtError();
       RetValExp = ER.get();
     }
-    return ReturnStmt::Create(Context, ReturnLoc, RetValExp,
+    return ReturnStmt::Create(Context, ReturnLoc, SemiLoc, RetValExp,
                               /* NRVOCandidate=*/nullptr);
   }
 
@@ -3414,7 +3415,7 @@ Sema::ActOnCapScopeReturnStmt(SourceLocation ReturnLoc, Expr *RetValExp) {
     RetValExp = ER.get();
   }
   auto *Result =
-      ReturnStmt::Create(Context, ReturnLoc, RetValExp, NRVOCandidate);
+      ReturnStmt::Create(Context, ReturnLoc, SemiLoc, RetValExp, NRVOCandidate);
 
   // If we need to check for the named return value optimization,
   // or if we need to infer the return type,
@@ -3581,15 +3582,15 @@ bool Sema::DeduceFunctionTypeFromReturnExpr(FunctionDecl *FD,
   return false;
 }
 
-StmtResult
-Sema::ActOnReturnStmt(SourceLocation ReturnLoc, Expr *RetValExp,
-                      Scope *CurScope) {
+StmtResult Sema::ActOnReturnStmt(SourceLocation ReturnLoc,
+                                 SourceLocation SemiLoc, Expr *RetValExp,
+                                 Scope *CurScope) {
   // Correct typos, in case the containing function returns 'auto' and
   // RetValExp should determine the deduced type.
   ExprResult RetVal = CorrectDelayedTyposInExpr(RetValExp);
   if (RetVal.isInvalid())
     return StmtError();
-  StmtResult R = BuildReturnStmt(ReturnLoc, RetVal.get());
+  StmtResult R = BuildReturnStmt(ReturnLoc, SemiLoc, RetVal.get());
   if (R.isInvalid() || ExprEvalContexts.back().Context ==
                            ExpressionEvaluationContext::DiscardedStatement)
     return R;
@@ -3606,13 +3607,14 @@ Sema::ActOnReturnStmt(SourceLocation ReturnLoc, Expr *RetValExp,
   return R;
 }
 
-StmtResult Sema::BuildReturnStmt(SourceLocation ReturnLoc, Expr *RetValExp) {
+StmtResult Sema::BuildReturnStmt(SourceLocation ReturnLoc,
+                                 SourceLocation SemiLoc, Expr *RetValExp) {
   // Check for unexpanded parameter packs.
   if (RetValExp && DiagnoseUnexpandedParameterPack(RetValExp))
     return StmtError();
 
   if (isa<CapturingScopeInfo>(getCurFunction()))
-    return ActOnCapScopeReturnStmt(ReturnLoc, RetValExp);
+    return ActOnCapScopeReturnStmt(ReturnLoc, SemiLoc, RetValExp);
 
   QualType FnRetType;
   QualType RelatedRetType;
@@ -3657,7 +3659,7 @@ StmtResult Sema::BuildReturnStmt(SourceLocation ReturnLoc, Expr *RetValExp) {
         return StmtError();
       RetValExp = ER.get();
     }
-    return ReturnStmt::Create(Context, ReturnLoc, RetValExp,
+    return ReturnStmt::Create(Context, ReturnLoc, SemiLoc, RetValExp,
                               /* NRVOCandidate=*/nullptr);
   }
 
@@ -3754,7 +3756,7 @@ StmtResult Sema::BuildReturnStmt(SourceLocation ReturnLoc, Expr *RetValExp) {
       }
     }
 
-    Result = ReturnStmt::Create(Context, ReturnLoc, RetValExp,
+    Result = ReturnStmt::Create(Context, ReturnLoc, SemiLoc, RetValExp,
                                 /* NRVOCandidate=*/nullptr);
   } else if (!RetValExp && !HasDependentReturnType) {
     FunctionDecl *FD = getCurFunctionDecl();
@@ -3778,8 +3780,9 @@ StmtResult Sema::BuildReturnStmt(SourceLocation ReturnLoc, Expr *RetValExp) {
     else
       Diag(ReturnLoc, DiagID) << getCurMethodDecl()->getDeclName() << 1/*meth*/;
 
-    Result = ReturnStmt::Create(Context, ReturnLoc, /* RetExpr=*/nullptr,
-                                /* NRVOCandidate=*/nullptr);
+    Result =
+        ReturnStmt::Create(Context, ReturnLoc, SemiLoc, /* RetExpr=*/nullptr,
+                           /* NRVOCandidate=*/nullptr);
   } else {
     assert(RetValExp || HasDependentReturnType);
     const VarDecl *NRVOCandidate = nullptr;
@@ -3833,7 +3836,8 @@ StmtResult Sema::BuildReturnStmt(SourceLocation ReturnLoc, Expr *RetValExp) {
         return StmtError();
       RetValExp = ER.get();
     }
-    Result = ReturnStmt::Create(Context, ReturnLoc, RetValExp, NRVOCandidate);
+    Result = ReturnStmt::Create(Context, ReturnLoc, SemiLoc, RetValExp,
+                                NRVOCandidate);
   }
 
   // If we need to check for the named return value optimization, save the

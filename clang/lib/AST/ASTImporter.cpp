@@ -6130,13 +6130,14 @@ ExpectedStmt ASTNodeImporter::VisitReturnStmt(ReturnStmt *S) {
 
   Error Err = Error::success();
   auto ToReturnLoc = importChecked(Err, S->getReturnLoc());
+  auto ToSemiLoc = importChecked(Err, S->getSemiLoc());
   auto ToRetValue = importChecked(Err, S->getRetValue());
   auto ToNRVOCandidate = importChecked(Err, S->getNRVOCandidate());
   if (Err)
     return std::move(Err);
 
-  return ReturnStmt::Create(Importer.getToContext(), ToReturnLoc, ToRetValue,
-                            ToNRVOCandidate);
+  return ReturnStmt::Create(Importer.getToContext(), ToReturnLoc, ToSemiLoc,
+                            ToRetValue, ToNRVOCandidate);
 }
 
 ExpectedStmt ASTNodeImporter::VisitCXXCatchStmt(CXXCatchStmt *S) {

@@ -200,7 +200,8 @@ ObjCIvarRefExpr *ASTMaker::makeObjCIvarRef(const Expr *Base,
 }
 
 ReturnStmt *ASTMaker::makeReturn(const Expr *RetVal) {
-  return ReturnStmt::Create(C, SourceLocation(), const_cast<Expr *>(RetVal),
+  return ReturnStmt::Create(C, SourceLocation(), SourceLocation(),
+                            const_cast<Expr *>(RetVal),
                             /* NRVOCandidate=*/nullptr);
 }
 

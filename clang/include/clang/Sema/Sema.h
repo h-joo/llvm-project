@@ -4399,10 +4399,12 @@ public:
   bool isCopyElisionCandidate(QualType ReturnType, const VarDecl *VD,
                               CopyElisionSemanticsKind CESK);
 
-  StmtResult ActOnReturnStmt(SourceLocation ReturnLoc, Expr *RetValExp,
-                             Scope *CurScope);
-  StmtResult BuildReturnStmt(SourceLocation ReturnLoc, Expr *RetValExp);
-  StmtResult ActOnCapScopeReturnStmt(SourceLocation ReturnLoc, Expr *RetValExp);
+  StmtResult ActOnReturnStmt(SourceLocation ReturnLoc, SourceLocation SemiLoc,
+                             Expr *RetValExp, Scope *CurScope);
+  StmtResult BuildReturnStmt(SourceLocation ReturnLoc, SourceLocation SemiLoc,
+                             Expr *RetValExp);
+  StmtResult ActOnCapScopeReturnStmt(SourceLocation ReturnLoc,
+                                     SourceLocation SemiLoc, Expr *RetValExp);
 
   StmtResult ActOnGCCAsmStmt(SourceLocation AsmLoc, bool IsSimple,
                              bool IsVolatile, unsigned NumOutputs,

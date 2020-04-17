@@ -1388,8 +1388,9 @@ public:
   ///
   /// By default, performs semantic analysis to build the new statement.
   /// Subclasses may override this routine to provide different behavior.
-  StmtResult RebuildReturnStmt(SourceLocation ReturnLoc, Expr *Result) {
-    return getSema().BuildReturnStmt(ReturnLoc, Result);
+  StmtResult RebuildReturnStmt(SourceLocation ReturnLoc, SourceLocation SemiLoc,
+                               Expr *Result) {
+    return getSema().BuildReturnStmt(ReturnLoc, SemiLoc, Result);
   }
 
   /// Build a new declaration statement.
@@ -7310,7 +7311,8 @@ TreeTransform<Derived>::TransformReturnStmt(ReturnStmt *S) {
 
   // FIXME: We always rebuild the return statement because there is no way
   // to tell whether the return type of the function has changed.
-  return getDerived().RebuildReturnStmt(S->getReturnLoc(), Result.get());
+  return getDerived().RebuildReturnStmt(S->getReturnLoc(), S->getSemiLoc(),
+                                        Result.get());
 }
 
 template<typename Derived>

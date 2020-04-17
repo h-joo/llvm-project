@@ -2153,7 +2153,8 @@ StmtResult Parser::ParseReturnStatement() {
   }
   if (IsCoreturn)
     return Actions.ActOnCoreturnStmt(getCurScope(), ReturnLoc, R.get());
-  return Actions.ActOnReturnStmt(ReturnLoc, R.get(), getCurScope());
+  return Actions.ActOnReturnStmt(ReturnLoc, /*SemiLoc*/ Tok.getLocation(),
+                                 R.get(), getCurScope());
 }
 
 StmtResult Parser::ParsePragmaLoopHint(StmtVector &Stmts,

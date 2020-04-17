@@ -7912,7 +7912,7 @@ public:
     // Build the final return statement.
     if (RetVal.isInvalid())
       return StmtError();
-    StmtResult ReturnStmt = S.BuildReturnStmt(Loc, RetVal.get());
+    StmtResult ReturnStmt = S.BuildReturnStmt(Loc, Loc, RetVal.get());
     if (ReturnStmt.isInvalid())
       return StmtError();
     Stmts.Stmts.push_back(ReturnStmt.get());
@@ -7984,7 +7984,7 @@ private:
 
     ExprResult False = S.ActOnCXXBoolLiteral(Loc, tok::kw_false);
     assert(!False.isInvalid() && "should never fail");
-    StmtResult ReturnFalse = S.BuildReturnStmt(Loc, False.get());
+    StmtResult ReturnFalse = S.BuildReturnStmt(Loc, Loc, False.get());
     if (ReturnFalse.isInvalid())
       return StmtError();
 
@@ -8138,7 +8138,7 @@ private:
       VDRef = getDecl(VD);
       if (VDRef.isInvalid())
         return StmtError();
-      StmtResult ReturnStmt = S.BuildReturnStmt(Loc, VDRef.get());
+      StmtResult ReturnStmt = S.BuildReturnStmt(Loc, Loc, VDRef.get());
       if (ReturnStmt.isInvalid())
         return StmtError();
 
@@ -14036,7 +14036,7 @@ void Sema::DefineImplicitCopyAssignment(SourceLocation CurrentLocation,
     // Add a "return *this;"
     ExprResult ThisObj = CreateBuiltinUnaryOp(Loc, UO_Deref, This.build(*this, Loc));
 
-    StmtResult Return = BuildReturnStmt(Loc, ThisObj.get());
+    StmtResult Return = BuildReturnStmt(Loc, Loc, ThisObj.get());
     if (Return.isInvalid())
       Invalid = true;
     else
@@ -14409,7 +14409,7 @@ void Sema::DefineImplicitMoveAssignment(SourceLocation CurrentLocation,
     ExprResult ThisObj =
         CreateBuiltinUnaryOp(Loc, UO_Deref, This.build(*this, Loc));
 
-    StmtResult Return = BuildReturnStmt(Loc, ThisObj.get());
+    StmtResult Return = BuildReturnStmt(Loc, Loc, ThisObj.get());
     if (Return.isInvalid())
       Invalid = true;
     else
@@ -14749,7 +14749,9 @@ void Sema::DefineImplicitLambdaToFunctionPointerConversion(
   Expr *FunctionRef = BuildDeclRefExpr(Invoker, Invoker->getType(),
                                        VK_LValue, Conv->getLocation());
   assert(FunctionRef && "Can't refer to __invoke function?");
-  Stmt *Return = BuildReturnStmt(Conv->getLocation(), FunctionRef).get();
+  Stmt *Return =
+      BuildReturnStmt(Conv->getLocation(), Conv->getLocation(), FunctionRef)
+          .get();
   Conv->setBody(CompoundStmt::Create(Context, Return, Conv->getLocation(),
                                      Conv->getLocation()));
   Conv->markUsed(Context);
@@ -14796,7 +14798,8 @@ void Sema::DefineImplicitLambdaToBlockPointerConversion(
 
   // Create the return statement that returns the block from the conversion
   // function.
-  StmtResult Return = BuildReturnStmt(Conv->getLocation(), BuildBlock.get());
+  StmtResult Return = BuildReturnStmt(Conv->getLocation(), Conv->getLocation(),
+                                      BuildBlock.get());
   if (Return.isInvalid()) {
     Diag(CurrentLocation, diag::note_lambda_to_block_conv);
     Conv->setInvalidDecl();

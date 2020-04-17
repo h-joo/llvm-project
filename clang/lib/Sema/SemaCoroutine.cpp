@@ -1109,7 +1109,7 @@ bool CoroutineStmtBuilder::makeReturnOnAllocFailure() {
     return false;
 
   StmtResult ReturnStmt =
-      S.BuildReturnStmt(Loc, ReturnObjectOnAllocationFailure.get());
+      S.BuildReturnStmt(Loc, Loc, ReturnObjectOnAllocationFailure.get());
   if (ReturnStmt.isInvalid()) {
     S.Diag(Found.getFoundDecl()->getLocation(), diag::note_member_declared_here)
         << DN;
@@ -1489,7 +1489,7 @@ bool CoroutineStmtBuilder::makeGroDeclAndReturnStmt() {
   if (declRef.isInvalid())
     return false;
 
-  StmtResult ReturnStmt = S.BuildReturnStmt(Loc, declRef.get());
+  StmtResult ReturnStmt = S.BuildReturnStmt(Loc, Loc, declRef.get());
   if (ReturnStmt.isInvalid()) {
     noteMemberDeclaredHere(S, ReturnValue, Fn);
     return false;

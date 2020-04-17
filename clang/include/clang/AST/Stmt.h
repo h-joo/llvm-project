@@ -102,7 +102,6 @@ protected:
     unsigned sClass : 8;
   };
   enum { NumStmtBits = 8 };
-
   class NullStmtBitfields {
     friend class ASTStmtReader;
     friend class ASTStmtWriter;
@@ -116,9 +115,6 @@ protected:
     ///   CALL(0);
     /// @endcode
     unsigned HasLeadingEmptyMacro : 1;
-
-    /// The location of the semi-colon.
-    SourceLocation SemiLoc;
   };
 
   class CompoundStmtBitfields {
@@ -1224,6 +1220,25 @@ public:
   void ProcessODRHash(llvm::FoldingSetNodeID &ID, ODRHash& Hash) const;
 };
 
+/// Base class for all statements which has an explicit trailing semicolon
+class ExprStmt : public Stmt {
+  SourceLocation SemiLoc;
+
+protected:
+  ExprStmt(StmtClass SC, SourceLocation SemiLoc) : Stmt(SC), SemiLoc(SemiLoc) {}
+
+  explicit ExprStmt(StmtClass SC, EmptyShell Empty) : Stmt(SC, Empty) {}
+
+public:
+  SourceLocation getSemiLoc() const { return SemiLoc; }
+  void setSemiLoc(SourceLocation L) { SemiLoc = L; }
+
+  static bool classof(const Stmt *T) {
+    return T->getStmtClass() == NullStmtClass ||
+           T->getStmtClass() == ReturnStmtClass;
+  }
+};
+
 /// DeclStmt - Adaptor class for mixing declarations with statements and
 /// expressions. For example, CompoundStmt mixes statements, expressions
 /// and declarations (variables, types). Another example is ForStmt, where
@@ -1300,19 +1315,15 @@ public:
 
 /// NullStmt - This is the null statement ";": C99 6.8.3p3.
 ///
-class NullStmt : public Stmt {
+class NullStmt : public ExprStmt {
 public:
   NullStmt(SourceLocation L, bool hasLeadingEmptyMacro = false)
-      : Stmt(NullStmtClass) {
+      : ExprStmt(NullStmtClass, L) {
     NullStmtBits.HasLeadingEmptyMacro = hasLeadingEmptyMacro;
-    setSemiLoc(L);
   }
 
   /// Build an empty null statement.
-  explicit NullStmt(EmptyShell Empty) : Stmt(NullStmtClass, Empty) {}
-
-  SourceLocation getSemiLoc() const { return NullStmtBits.SemiLoc; }
-  void setSemiLoc(SourceLocation L) { NullStmtBits.SemiLoc = L; }
+  explicit NullStmt(EmptyShell Empty) : ExprStmt(NullStmtClass, Empty) {}
 
   bool hasLeadingEmptyMacro() const {
     return NullStmtBits.HasLeadingEmptyMacro;
@@ -2640,7 +2651,7 @@ public:
 /// return void.  We explicitly model this in the AST, which means you can't
 /// depend on the return type of the function and the presence of an argument.
 class ReturnStmt final
-    : public Stmt,
+    : public ExprStmt,
       private llvm::TrailingObjects<ReturnStmt, const VarDecl *> {
   friend TrailingObjects;
 
@@ -2658,14 +2669,16 @@ class ReturnStmt final
   }
 
   /// Build a return statement.
-  ReturnStmt(SourceLocation RL, Expr *E, const VarDecl *NRVOCandidate);
+  ReturnStmt(SourceLocation RL, SourceLocation SemiLoc, Expr *E,
+             const VarDecl *NRVOCandidate);
 
   /// Build an empty return statement.
   explicit ReturnStmt(EmptyShell Empty, bool HasNRVOCandidate);
 
 public:
   /// Create a return statement.
-  static ReturnStmt *Create(const ASTContext &Ctx, SourceLocation RL, Expr *E,
+  static ReturnStmt *Create(const ASTContext &Ctx, SourceLocation RL,
+                            SourceLocation SemiLoc, Expr *E,
                             const VarDecl *NRVOCandidate);
 
   /// Create an empty return statement, optionally with
@@ -2699,9 +2712,7 @@ public:
   void setReturnLoc(SourceLocation L) { ReturnStmtBits.RetLoc = L; }
 
   SourceLocation getBeginLoc() const { return getReturnLoc(); }
-  SourceLocation getEndLoc() const LLVM_READONLY {
-    return RetExpr ? RetExpr->getEndLoc() : getReturnLoc();
-  }
+  SourceLocation getEndLoc() const LLVM_READONLY { return getSemiLoc(); }
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == ReturnStmtClass;
