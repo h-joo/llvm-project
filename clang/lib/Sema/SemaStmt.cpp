@@ -1337,10 +1337,10 @@ StmtResult Sema::ActOnWhileStmt(SourceLocation WhileLoc, ConditionResult Cond,
                            WhileLoc);
 }
 
-StmtResult
-Sema::ActOnDoStmt(SourceLocation DoLoc, Stmt *Body,
-                  SourceLocation WhileLoc, SourceLocation CondLParen,
-                  Expr *Cond, SourceLocation CondRParen) {
+StmtResult Sema::ActOnDoStmt(SourceLocation DoLoc, Stmt *Body,
+                             SourceLocation WhileLoc, SourceLocation CondLParen,
+                             Expr *Cond, SourceLocation CondRParen,
+                             SourceLocation SemiLoc) {
   assert(Cond && "ActOnDoStmt(): missing expression");
 
   CheckBreakContinueBinding(Cond);
@@ -1359,7 +1359,7 @@ Sema::ActOnDoStmt(SourceLocation DoLoc, Stmt *Body,
       !Diags.isIgnored(diag::warn_comma_operator, Cond->getExprLoc()))
     CommaVisitor(*this).Visit(Cond);
 
-  return new (Context) DoStmt(Body, Cond, DoLoc, WhileLoc, CondRParen);
+  return new (Context) DoStmt(Body, Cond, DoLoc, WhileLoc, CondRParen, SemiLoc);
 }
 
 namespace {

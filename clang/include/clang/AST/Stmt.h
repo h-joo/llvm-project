@@ -1235,7 +1235,8 @@ public:
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == NullStmtClass ||
-           T->getStmtClass() == ReturnStmtClass;
+           T->getStmtClass() == ReturnStmtClass ||
+           T->getStmtClass() == DoStmtClass;
   }
 };
 
@@ -2368,7 +2369,7 @@ public:
 };
 
 /// DoStmt - This represents a 'do/while' stmt.
-class DoStmt : public Stmt {
+class DoStmt : public ExprStmt {
   enum { BODY, COND, END_EXPR };
   Stmt *SubExprs[END_EXPR];
   SourceLocation WhileLoc;
@@ -2376,15 +2377,15 @@ class DoStmt : public Stmt {
 
 public:
   DoStmt(Stmt *Body, Expr *Cond, SourceLocation DL, SourceLocation WL,
-         SourceLocation RP)
-      : Stmt(DoStmtClass), WhileLoc(WL), RParenLoc(RP) {
+         SourceLocation RP, SourceLocation SemiLoc)
+      : ExprStmt(DoStmtClass, SemiLoc), WhileLoc(WL), RParenLoc(RP) {
     setCond(Cond);
     setBody(Body);
     setDoLoc(DL);
   }
 
   /// Build an empty do-while statement.
-  explicit DoStmt(EmptyShell Empty) : Stmt(DoStmtClass, Empty) {}
+  explicit DoStmt(EmptyShell Empty) : ExprStmt(DoStmtClass, Empty) {}
 
   Expr *getCond() { return reinterpret_cast<Expr *>(SubExprs[COND]); }
   const Expr *getCond() const {
@@ -2405,7 +2406,7 @@ public:
   void setRParenLoc(SourceLocation L) { RParenLoc = L; }
 
   SourceLocation getBeginLoc() const { return getDoLoc(); }
-  SourceLocation getEndLoc() const { return getRParenLoc(); }
+  SourceLocation getEndLoc() const { return getSemiLoc(); }
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == DoStmtClass;

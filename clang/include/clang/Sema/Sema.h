@@ -4316,7 +4316,8 @@ public:
                             Stmt *Body);
   StmtResult ActOnDoStmt(SourceLocation DoLoc, Stmt *Body,
                          SourceLocation WhileLoc, SourceLocation CondLParen,
-                         Expr *Cond, SourceLocation CondRParen);
+                         Expr *Cond, SourceLocation CondRParen,
+                         SourceLocation SemiLoc);
 
   StmtResult ActOnForStmt(SourceLocation ForLoc,
                           SourceLocation LParenLoc,

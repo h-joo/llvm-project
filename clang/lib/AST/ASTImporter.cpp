@@ -6059,11 +6059,12 @@ ExpectedStmt ASTNodeImporter::VisitDoStmt(DoStmt *S) {
   auto ToDoLoc = importChecked(Err, S->getDoLoc());
   auto ToWhileLoc = importChecked(Err, S->getWhileLoc());
   auto ToRParenLoc = importChecked(Err, S->getRParenLoc());
+  auto ToSemiLoc = importChecked(Err, S->getSemiLoc());
   if (Err)
     return std::move(Err);
 
-  return new (Importer.getToContext()) DoStmt(
-      ToBody, ToCond, ToDoLoc, ToWhileLoc, ToRParenLoc);
+  return new (Importer.getToContext())
+      DoStmt(ToBody, ToCond, ToDoLoc, ToWhileLoc, ToRParenLoc, ToSemiLoc);
 }
 
 ExpectedStmt ASTNodeImporter::VisitForStmt(ForStmt *S) {

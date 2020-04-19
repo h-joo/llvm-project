@@ -1348,9 +1348,10 @@ public:
   /// Subclasses may override this routine to provide different behavior.
   StmtResult RebuildDoStmt(SourceLocation DoLoc, Stmt *Body,
                            SourceLocation WhileLoc, SourceLocation LParenLoc,
-                           Expr *Cond, SourceLocation RParenLoc) {
-    return getSema().ActOnDoStmt(DoLoc, Body, WhileLoc, LParenLoc,
-                                 Cond, RParenLoc);
+                           Expr *Cond, SourceLocation RParenLoc,
+                           SourceLocation SemiLoc) {
+    return getSema().ActOnDoStmt(DoLoc, Body, WhileLoc, LParenLoc, Cond,
+                                 RParenLoc, SemiLoc);
   }
 
   /// Build a new for statement.
@@ -7207,8 +7208,8 @@ TreeTransform<Derived>::TransformDoStmt(DoStmt *S) {
     return S;
 
   return getDerived().RebuildDoStmt(S->getDoLoc(), Body.get(), S->getWhileLoc(),
-                                    /*FIXME:*/S->getWhileLoc(), Cond.get(),
-                                    S->getRParenLoc());
+                                    /*FIXME:*/ S->getWhileLoc(), Cond.get(),
+                                    S->getRParenLoc(), S->getSemiLoc());
 }
 
 template<typename Derived>

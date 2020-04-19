@@ -1674,7 +1674,8 @@ StmtResult Parser::ParseDoStatement() {
     return StmtError();
 
   return Actions.ActOnDoStmt(DoLoc, Body.get(), WhileLoc, T.getOpenLocation(),
-                             Cond.get(), T.getCloseLocation());
+                             Cond.get(), T.getCloseLocation(),
+                             /*SemiLoc*/ Tok.getLocation());
 }
 
 bool Parser::isForRangeIdentifier() {
