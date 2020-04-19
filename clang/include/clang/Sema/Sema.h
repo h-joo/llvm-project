@@ -4362,12 +4362,11 @@ public:
                                   BuildForRangeKind Kind);
   StmtResult FinishCXXForRangeStmt(Stmt *ForRange, Stmt *Body);
 
-  StmtResult ActOnGotoStmt(SourceLocation GotoLoc,
-                           SourceLocation LabelLoc,
-                           LabelDecl *TheDecl);
+  StmtResult ActOnGotoStmt(SourceLocation GotoLoc, SourceLocation LabelLoc,
+                           LabelDecl *TheDecl, SourceLocation SemiLoc);
   StmtResult ActOnIndirectGotoStmt(SourceLocation GotoLoc,
-                                   SourceLocation StarLoc,
-                                   Expr *DestExp);
+                                   SourceLocation StarLoc, Expr *DestExp,
+                                   SourceLocation SemiLoc);
   StmtResult ActOnContinueStmt(SourceLocation ContinueLoc, Scope *CurScope);
   StmtResult ActOnBreakStmt(SourceLocation BreakLoc, Scope *CurScope);
 

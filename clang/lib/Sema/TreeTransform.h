@@ -1371,8 +1371,8 @@ public:
   /// By default, performs semantic analysis to build the new statement.
   /// Subclasses may override this routine to provide different behavior.
   StmtResult RebuildGotoStmt(SourceLocation GotoLoc, SourceLocation LabelLoc,
-                             LabelDecl *Label) {
-    return getSema().ActOnGotoStmt(GotoLoc, LabelLoc, Label);
+                             LabelDecl *Label, SourceLocation SemiLoc) {
+    return getSema().ActOnGotoStmt(GotoLoc, LabelLoc, Label, SemiLoc);
   }
 
   /// Build a new indirect goto statement.
@@ -1380,9 +1380,9 @@ public:
   /// By default, performs semantic analysis to build the new statement.
   /// Subclasses may override this routine to provide different behavior.
   StmtResult RebuildIndirectGotoStmt(SourceLocation GotoLoc,
-                                     SourceLocation StarLoc,
-                                     Expr *Target) {
-    return getSema().ActOnIndirectGotoStmt(GotoLoc, StarLoc, Target);
+                                     SourceLocation StarLoc, Expr *Target,
+                                     SourceLocation SemiLoc) {
+    return getSema().ActOnIndirectGotoStmt(GotoLoc, StarLoc, Target, SemiLoc);
   }
 
   /// Build a new return statement.
@@ -7271,7 +7271,7 @@ TreeTransform<Derived>::TransformGotoStmt(GotoStmt *S) {
 
   // Goto statements must always be rebuilt, to resolve the label.
   return getDerived().RebuildGotoStmt(S->getGotoLoc(), S->getLabelLoc(),
-                                      cast<LabelDecl>(LD));
+                                      cast<LabelDecl>(LD), S->getSemiLoc());
 }
 
 template<typename Derived>
@@ -7287,7 +7287,7 @@ TreeTransform<Derived>::TransformIndirectGotoStmt(IndirectGotoStmt *S) {
     return S;
 
   return getDerived().RebuildIndirectGotoStmt(S->getGotoLoc(), S->getStarLoc(),
-                                              Target.get());
+                                              Target.get(), S->getSemiLoc());
 }
 
 template<typename Derived>

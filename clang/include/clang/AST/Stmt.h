@@ -1236,7 +1236,9 @@ public:
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == NullStmtClass ||
            T->getStmtClass() == ReturnStmtClass ||
-           T->getStmtClass() == DoStmtClass;
+           T->getStmtClass() == DoStmtClass ||
+           T->getStmtClass() == GotoStmtClass ||
+           T->getStmtClass() == IndirectGotoStmtClass;
   }
 };
 
@@ -2496,18 +2498,19 @@ public:
 };
 
 /// GotoStmt - This represents a direct goto.
-class GotoStmt : public Stmt {
+class GotoStmt : public ExprStmt {
   LabelDecl *Label;
   SourceLocation LabelLoc;
 
 public:
-  GotoStmt(LabelDecl *label, SourceLocation GL, SourceLocation LL)
-      : Stmt(GotoStmtClass), Label(label), LabelLoc(LL) {
+  GotoStmt(LabelDecl *label, SourceLocation GL, SourceLocation LL,
+           SourceLocation SemiLoc)
+      : ExprStmt(GotoStmtClass, SemiLoc), Label(label), LabelLoc(LL) {
     setGotoLoc(GL);
   }
 
   /// Build an empty goto statement.
-  explicit GotoStmt(EmptyShell Empty) : Stmt(GotoStmtClass, Empty) {}
+  explicit GotoStmt(EmptyShell Empty) : ExprStmt(GotoStmtClass, Empty) {}
 
   LabelDecl *getLabel() const { return Label; }
   void setLabel(LabelDecl *D) { Label = D; }
@@ -2518,7 +2521,7 @@ public:
   void setLabelLoc(SourceLocation L) { LabelLoc = L; }
 
   SourceLocation getBeginLoc() const { return getGotoLoc(); }
-  SourceLocation getEndLoc() const { return getLabelLoc(); }
+  SourceLocation getEndLoc() const { return getSemiLoc(); }
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == GotoStmtClass;
@@ -2535,20 +2538,21 @@ public:
 };
 
 /// IndirectGotoStmt - This represents an indirect goto.
-class IndirectGotoStmt : public Stmt {
+class IndirectGotoStmt : public ExprStmt {
   SourceLocation StarLoc;
   Stmt *Target;
 
 public:
-  IndirectGotoStmt(SourceLocation gotoLoc, SourceLocation starLoc, Expr *target)
-      : Stmt(IndirectGotoStmtClass), StarLoc(starLoc) {
-    setTarget(target);
-    setGotoLoc(gotoLoc);
+  IndirectGotoStmt(SourceLocation GotoLoc, SourceLocation StarLoc, Expr *Target,
+                   SourceLocation SemiLoc)
+      : ExprStmt(IndirectGotoStmtClass, SemiLoc), StarLoc(StarLoc) {
+    setTarget(Target);
+    setGotoLoc(GotoLoc);
   }
 
   /// Build an empty indirect goto statement.
   explicit IndirectGotoStmt(EmptyShell Empty)
-      : Stmt(IndirectGotoStmtClass, Empty) {}
+      : ExprStmt(IndirectGotoStmtClass, Empty) {}
 
   void setGotoLoc(SourceLocation L) { GotoStmtBits.GotoLoc = L; }
   SourceLocation getGotoLoc() const { return GotoStmtBits.GotoLoc; }
@@ -2569,7 +2573,7 @@ public:
   }
 
   SourceLocation getBeginLoc() const { return getGotoLoc(); }
-  SourceLocation getEndLoc() const LLVM_READONLY { return Target->getEndLoc(); }
+  SourceLocation getEndLoc() const LLVM_READONLY { return getSemiLoc(); }
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == IndirectGotoStmtClass;

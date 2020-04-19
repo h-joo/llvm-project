@@ -2071,8 +2071,10 @@ StmtResult Parser::ParseGotoStatement() {
   if (Tok.is(tok::identifier)) {
     LabelDecl *LD = Actions.LookupOrCreateLabel(Tok.getIdentifierInfo(),
                                                 Tok.getLocation());
-    Res = Actions.ActOnGotoStmt(GotoLoc, Tok.getLocation(), LD);
+    SourceLocation LabelLoc = Tok.getLocation();
     ConsumeToken();
+    Res = Actions.ActOnGotoStmt(GotoLoc, LabelLoc, LD,
+                                /*SemiLoc*/ Tok.getLocation());
   } else if (Tok.is(tok::star)) {
     // GNU indirect goto extension.
     Diag(Tok, diag::ext_gnu_indirect_goto);
@@ -2082,7 +2084,8 @@ StmtResult Parser::ParseGotoStatement() {
       SkipUntil(tok::semi, StopBeforeMatch);
       return StmtError();
     }
-    Res = Actions.ActOnIndirectGotoStmt(GotoLoc, StarLoc, R.get());
+    Res = Actions.ActOnIndirectGotoStmt(GotoLoc, StarLoc, R.get(),
+                                        /*SemiLoc*/ Tok.getLocation());
   } else {
     Diag(Tok, diag::err_expected) << tok::identifier;
     return StmtError();

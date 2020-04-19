@@ -2904,17 +2904,16 @@ StmtResult Sema::FinishCXXForRangeStmt(Stmt *S, Stmt *B) {
   return S;
 }
 
-StmtResult Sema::ActOnGotoStmt(SourceLocation GotoLoc,
-                               SourceLocation LabelLoc,
-                               LabelDecl *TheDecl) {
+StmtResult Sema::ActOnGotoStmt(SourceLocation GotoLoc, SourceLocation LabelLoc,
+                               LabelDecl *TheDecl, SourceLocation SemiLoc) {
   setFunctionHasBranchIntoScope();
   TheDecl->markUsed(Context);
-  return new (Context) GotoStmt(TheDecl, GotoLoc, LabelLoc);
+  return new (Context) GotoStmt(TheDecl, GotoLoc, LabelLoc, SemiLoc);
 }
 
-StmtResult
-Sema::ActOnIndirectGotoStmt(SourceLocation GotoLoc, SourceLocation StarLoc,
-                            Expr *E) {
+StmtResult Sema::ActOnIndirectGotoStmt(SourceLocation GotoLoc,
+                                       SourceLocation StarLoc, Expr *E,
+                                       SourceLocation SemiLoc) {
   // Convert operand to void*
   if (!E->isTypeDependent()) {
     QualType ETy = E->getType();
@@ -2936,7 +2935,7 @@ Sema::ActOnIndirectGotoStmt(SourceLocation GotoLoc, SourceLocation StarLoc,
 
   setFunctionHasIndirectGoto();
 
-  return new (Context) IndirectGotoStmt(GotoLoc, StarLoc, E);
+  return new (Context) IndirectGotoStmt(GotoLoc, StarLoc, E, SemiLoc);
 }
 
 static void CheckJumpOutOfSEHFinally(Sema &S, SourceLocation Loc,

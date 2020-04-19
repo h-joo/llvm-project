@@ -6093,11 +6093,12 @@ ExpectedStmt ASTNodeImporter::VisitGotoStmt(GotoStmt *S) {
   auto ToLabel = importChecked(Err, S->getLabel());
   auto ToGotoLoc = importChecked(Err, S->getGotoLoc());
   auto ToLabelLoc = importChecked(Err, S->getLabelLoc());
+  auto ToSemiLoc = importChecked(Err, S->getSemiLoc());
   if (Err)
     return std::move(Err);
 
-  return new (Importer.getToContext()) GotoStmt(
-      ToLabel, ToGotoLoc, ToLabelLoc);
+  return new (Importer.getToContext())
+      GotoStmt(ToLabel, ToGotoLoc, ToLabelLoc, ToSemiLoc);
 }
 
 ExpectedStmt ASTNodeImporter::VisitIndirectGotoStmt(IndirectGotoStmt *S) {
@@ -6106,11 +6107,12 @@ ExpectedStmt ASTNodeImporter::VisitIndirectGotoStmt(IndirectGotoStmt *S) {
   auto ToGotoLoc = importChecked(Err, S->getGotoLoc());
   auto ToStarLoc = importChecked(Err, S->getStarLoc());
   auto ToTarget = importChecked(Err, S->getTarget());
+  auto ToSemiLoc = importChecked(Err, S->getSemiLoc());
   if (Err)
     return std::move(Err);
 
-  return new (Importer.getToContext()) IndirectGotoStmt(
-      ToGotoLoc, ToStarLoc, ToTarget);
+  return new (Importer.getToContext())
+      IndirectGotoStmt(ToGotoLoc, ToStarLoc, ToTarget, ToSemiLoc);
 }
 
 ExpectedStmt ASTNodeImporter::VisitContinueStmt(ContinueStmt *S) {
