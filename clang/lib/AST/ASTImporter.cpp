@@ -6116,17 +6116,23 @@ ExpectedStmt ASTNodeImporter::VisitIndirectGotoStmt(IndirectGotoStmt *S) {
 }
 
 ExpectedStmt ASTNodeImporter::VisitContinueStmt(ContinueStmt *S) {
-  ExpectedSLoc ToContinueLocOrErr = import(S->getContinueLoc());
-  if (!ToContinueLocOrErr)
-    return ToContinueLocOrErr.takeError();
-  return new (Importer.getToContext()) ContinueStmt(*ToContinueLocOrErr);
+
+  Error Err = Error::success();
+  auto ToContinueLoc = importChecked(Err, S->getContinueLoc());
+  auto ToSemiLoc = importChecked(Err, S->getSemiLoc());
+  if (Err)
+    return std::move(Err);
+  return new (Importer.getToContext()) ContinueStmt(ToContinueLoc, ToSemiLoc);
 }
 
 ExpectedStmt ASTNodeImporter::VisitBreakStmt(BreakStmt *S) {
-  auto ToBreakLocOrErr = import(S->getBreakLoc());
-  if (!ToBreakLocOrErr)
-    return ToBreakLocOrErr.takeError();
-  return new (Importer.getToContext()) BreakStmt(*ToBreakLocOrErr);
+
+  Error Err = Error::success();
+  auto ToBreakLoc = importChecked(Err, S->getBreakLoc());
+  auto ToSemiLoc = importChecked(Err, S->getSemiLoc());
+  if (Err)
+    return std::move(Err);
+  return new (Importer.getToContext()) BreakStmt(ToBreakLoc, ToSemiLoc);
 }
 
 ExpectedStmt ASTNodeImporter::VisitReturnStmt(ReturnStmt *S) {

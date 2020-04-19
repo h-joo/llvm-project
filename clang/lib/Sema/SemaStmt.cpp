@@ -2946,8 +2946,8 @@ static void CheckJumpOutOfSEHFinally(Sema &S, SourceLocation Loc,
   }
 }
 
-StmtResult
-Sema::ActOnContinueStmt(SourceLocation ContinueLoc, Scope *CurScope) {
+StmtResult Sema::ActOnContinueStmt(SourceLocation ContinueLoc, Scope *CurScope,
+                                   SourceLocation SemiLoc) {
   Scope *S = CurScope->getContinueParent();
   if (!S) {
     // C99 6.8.6.2p1: A break shall appear only in or as a loop body.
@@ -2955,11 +2955,11 @@ Sema::ActOnContinueStmt(SourceLocation ContinueLoc, Scope *CurScope) {
   }
   CheckJumpOutOfSEHFinally(*this, ContinueLoc, *S);
 
-  return new (Context) ContinueStmt(ContinueLoc);
+  return new (Context) ContinueStmt(ContinueLoc, SemiLoc);
 }
 
-StmtResult
-Sema::ActOnBreakStmt(SourceLocation BreakLoc, Scope *CurScope) {
+StmtResult Sema::ActOnBreakStmt(SourceLocation BreakLoc, Scope *CurScope,
+                                SourceLocation SemiLoc) {
   Scope *S = CurScope->getBreakParent();
   if (!S) {
     // C99 6.8.6.3p1: A break shall appear only in or as a switch/loop body.
@@ -2970,7 +2970,7 @@ Sema::ActOnBreakStmt(SourceLocation BreakLoc, Scope *CurScope) {
                      << "break");
   CheckJumpOutOfSEHFinally(*this, BreakLoc, *S);
 
-  return new (Context) BreakStmt(BreakLoc);
+  return new (Context) BreakStmt(BreakLoc, SemiLoc);
 }
 
 /// Determine whether the given expression is a candidate for

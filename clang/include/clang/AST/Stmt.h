@@ -1238,7 +1238,9 @@ public:
            T->getStmtClass() == ReturnStmtClass ||
            T->getStmtClass() == DoStmtClass ||
            T->getStmtClass() == GotoStmtClass ||
-           T->getStmtClass() == IndirectGotoStmtClass;
+           T->getStmtClass() == IndirectGotoStmtClass ||
+           T->getStmtClass() == BreakStmtClass ||
+           T->getStmtClass() == ContinueStmtClass;
   }
 };
 
@@ -2588,20 +2590,22 @@ public:
 };
 
 /// ContinueStmt - This represents a continue.
-class ContinueStmt : public Stmt {
+class ContinueStmt : public ExprStmt {
 public:
-  ContinueStmt(SourceLocation CL) : Stmt(ContinueStmtClass) {
+  ContinueStmt(SourceLocation CL, SourceLocation SemiLoc)
+      : ExprStmt(ContinueStmtClass, SemiLoc) {
     setContinueLoc(CL);
   }
 
   /// Build an empty continue statement.
-  explicit ContinueStmt(EmptyShell Empty) : Stmt(ContinueStmtClass, Empty) {}
+  explicit ContinueStmt(EmptyShell Empty)
+      : ExprStmt(ContinueStmtClass, Empty) {}
 
   SourceLocation getContinueLoc() const { return ContinueStmtBits.ContinueLoc; }
   void setContinueLoc(SourceLocation L) { ContinueStmtBits.ContinueLoc = L; }
 
   SourceLocation getBeginLoc() const { return getContinueLoc(); }
-  SourceLocation getEndLoc() const { return getContinueLoc(); }
+  SourceLocation getEndLoc() const { return getSemiLoc(); }
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == ContinueStmtClass;
@@ -2618,20 +2622,21 @@ public:
 };
 
 /// BreakStmt - This represents a break.
-class BreakStmt : public Stmt {
+class BreakStmt : public ExprStmt {
 public:
-  BreakStmt(SourceLocation BL) : Stmt(BreakStmtClass) {
+  BreakStmt(SourceLocation BL, SourceLocation SemiLoc)
+      : ExprStmt(BreakStmtClass, SemiLoc) {
     setBreakLoc(BL);
   }
 
   /// Build an empty break statement.
-  explicit BreakStmt(EmptyShell Empty) : Stmt(BreakStmtClass, Empty) {}
+  explicit BreakStmt(EmptyShell Empty) : ExprStmt(BreakStmtClass, Empty) {}
 
   SourceLocation getBreakLoc() const { return BreakStmtBits.BreakLoc; }
   void setBreakLoc(SourceLocation L) { BreakStmtBits.BreakLoc = L; }
 
   SourceLocation getBeginLoc() const { return getBreakLoc(); }
-  SourceLocation getEndLoc() const { return getBreakLoc(); }
+  SourceLocation getEndLoc() const { return getSemiLoc(); }
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == BreakStmtClass;

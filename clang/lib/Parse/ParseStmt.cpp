@@ -2102,7 +2102,8 @@ StmtResult Parser::ParseGotoStatement() {
 ///
 StmtResult Parser::ParseContinueStatement() {
   SourceLocation ContinueLoc = ConsumeToken();  // eat the 'continue'.
-  return Actions.ActOnContinueStmt(ContinueLoc, getCurScope());
+  return Actions.ActOnContinueStmt(ContinueLoc, getCurScope(),
+                                   Tok.getLocation());
 }
 
 /// ParseBreakStatement
@@ -2113,7 +2114,7 @@ StmtResult Parser::ParseContinueStatement() {
 ///
 StmtResult Parser::ParseBreakStatement() {
   SourceLocation BreakLoc = ConsumeToken();  // eat the 'break'.
-  return Actions.ActOnBreakStmt(BreakLoc, getCurScope());
+  return Actions.ActOnBreakStmt(BreakLoc, getCurScope(), Tok.getLocation());
 }
 
 /// ParseReturnStatement
