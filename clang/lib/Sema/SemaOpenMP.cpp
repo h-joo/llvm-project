@@ -15902,18 +15902,22 @@ Sema::ActOnOpenMPDependClause(Expr *DepModifier, OpenMPDependClauseKind DepKind,
           continue;
         }
 
-        auto *ASE = dyn_cast<ArraySubscriptExpr>(SimpleExpr);
-        if (!RefExpr->IgnoreParenImpCasts()->isLValue() ||
-            (ASE &&
-             !ASE->getBase()
-                  ->getType()
-                  .getNonReferenceType()
-                  ->isPointerType() &&
-             !ASE->getBase()->getType().getNonReferenceType()->isArrayType())) {
+        if (!RefExpr->IgnoreParenImpCasts()->isLValue()) {
           Diag(ELoc, diag::err_omp_expected_addressable_lvalue_or_array_item)
               << (LangOpts.OpenMP >= 50 ? 1 : 0)
               << (LangOpts.OpenMP >= 50 ? 1 : 0) << RefExpr->getSourceRange();
           continue;
+        }
+
+        if (auto *ASE = dyn_cast<ArraySubscriptExpr>(SimpleExpr)) {
+          QualType BaseType = ASE->getBase()->getType().getNonReferenceType();
+          if (!BaseType->isDependentType() && !BaseType->isPointerType() &&
+              !BaseType->isArrayType()) {
+            Diag(ELoc, diag::err_omp_expected_addressable_lvalue_or_array_item)
+                << (LangOpts.OpenMP >= 50 ? 1 : 0)
+                << (LangOpts.OpenMP >= 50 ? 1 : 0) << RefExpr->getSourceRange();
+            continue;
+          }
         }
 
         ExprResult Res;
