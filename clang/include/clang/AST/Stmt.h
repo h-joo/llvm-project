@@ -2410,7 +2410,7 @@ public:
   void setRParenLoc(SourceLocation L) { RParenLoc = L; }
 
   SourceLocation getBeginLoc() const { return getDoLoc(); }
-  SourceLocation getEndLoc() const { return getSemiLoc(); }
+  SourceLocation getEndLoc() const { return getRParenLoc(); }
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == DoStmtClass;
@@ -2523,7 +2523,7 @@ public:
   void setLabelLoc(SourceLocation L) { LabelLoc = L; }
 
   SourceLocation getBeginLoc() const { return getGotoLoc(); }
-  SourceLocation getEndLoc() const { return getSemiLoc(); }
+  SourceLocation getEndLoc() const { return getLabelLoc(); }
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == GotoStmtClass;
@@ -2575,7 +2575,7 @@ public:
   }
 
   SourceLocation getBeginLoc() const { return getGotoLoc(); }
-  SourceLocation getEndLoc() const LLVM_READONLY { return getSemiLoc(); }
+  SourceLocation getEndLoc() const LLVM_READONLY { return Target->getEndLoc(); }
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == IndirectGotoStmtClass;
@@ -2605,7 +2605,7 @@ public:
   void setContinueLoc(SourceLocation L) { ContinueStmtBits.ContinueLoc = L; }
 
   SourceLocation getBeginLoc() const { return getContinueLoc(); }
-  SourceLocation getEndLoc() const { return getSemiLoc(); }
+  SourceLocation getEndLoc() const { return getContinueLoc(); }
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == ContinueStmtClass;
@@ -2636,7 +2636,7 @@ public:
   void setBreakLoc(SourceLocation L) { BreakStmtBits.BreakLoc = L; }
 
   SourceLocation getBeginLoc() const { return getBreakLoc(); }
-  SourceLocation getEndLoc() const { return getSemiLoc(); }
+  SourceLocation getEndLoc() const { return getBreakLoc(); }
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == BreakStmtClass;
@@ -2722,7 +2722,9 @@ public:
   void setReturnLoc(SourceLocation L) { ReturnStmtBits.RetLoc = L; }
 
   SourceLocation getBeginLoc() const { return getReturnLoc(); }
-  SourceLocation getEndLoc() const LLVM_READONLY { return getSemiLoc(); }
+  SourceLocation getEndLoc() const LLVM_READONLY {
+    return RetExpr ? RetExpr->getEndLoc() : getReturnLoc();
+  }
 
   static bool classof(const Stmt *T) {
     return T->getStmtClass() == ReturnStmtClass;
